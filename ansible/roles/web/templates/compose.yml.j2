@@ -1,0 +1,19 @@
+services:
+  app:
+    image: "{{ aws_account_id.stdout }}.dkr.ecr.ap-southeast-1.amazonaws.com/devops-final-app:latest"
+    container_name: devops-final-app
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    command:
+      - "--path.rootfs=/host"
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - "/:/host:ro,rslave"
+    ports:
+      - "9100:9100"

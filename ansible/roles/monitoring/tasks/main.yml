@@ -1,0 +1,50 @@
+---
+- name: Create monitoring directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/monitoring
+    - /opt/monitoring/grafana/provisioning/datasources
+    - /opt/monitoring/grafana/provisioning/dashboards
+    - /opt/monitoring/grafana/dashboards
+
+- name: Deploy Prometheus configuration
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /opt/monitoring/prometheus.yml
+    mode: "0644"
+
+- name: Deploy Grafana Prometheus datasource provisioning
+  ansible.builtin.copy:
+    src: grafana/provisioning/datasources/prometheus.yml
+    dest: /opt/monitoring/grafana/provisioning/datasources/prometheus.yml
+    mode: "0644"
+
+- name: Deploy Grafana dashboard provisioning
+  ansible.builtin.copy:
+    src: grafana/provisioning/dashboards/dashboard.yml
+    dest: /opt/monitoring/grafana/provisioning/dashboards/dashboard.yml
+    mode: "0644"
+
+- name: Deploy Grafana dashboard
+  ansible.builtin.copy:
+    src: grafana/dashboards/devops-final.json
+    dest: /opt/monitoring/grafana/dashboards/devops-final.json
+    mode: "0644"
+
+- name: Deploy monitoring compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: /opt/monitoring/compose.yml
+    mode: "0600"
+
+- name: Pull monitoring images
+  ansible.builtin.command: docker compose -f /opt/monitoring/compose.yml pull
+  changed_when: false
+
+- name: Start Prometheus and Grafana
+  ansible.builtin.command: docker compose -f /opt/monitoring/compose.yml up -d
+  register: monitoring_compose
+  changed_when: "'Started' in monitoring_compose.stdout or 'Created' in monitoring_compose.stdout or 'Recreated' in monitoring_compose.stdout"

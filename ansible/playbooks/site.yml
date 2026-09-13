@@ -1,0 +1,22 @@
+---
+- name: Configure web application server
+  hosts: web
+  become: true
+  roles:
+    - docker
+    - web
+
+- name: Configure private monitoring server
+  hosts: monitoring
+  become: true
+  vars:
+    grafana_admin_password: "{{ lookup('env', 'GRAFANA_ADMIN_PASSWORD') }}"
+  pre_tasks:
+    - name: Ensure Grafana password was supplied outside Git
+      ansible.builtin.assert:
+        that:
+          - grafana_admin_password | length >= 8
+        fail_msg: "Set GRAFANA_ADMIN_PASSWORD before running this playbook."
+  roles:
+    - docker
+    - monitoring

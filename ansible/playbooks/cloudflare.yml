@@ -1,0 +1,36 @@
+---
+- name: Run Cloudflare Tunnel on the private monitoring host
+  hosts: monitoring
+  become: true
+
+  tasks:
+    - name: Read Cloudflare tunnel token from AWS SSM Parameter Store
+      ansible.builtin.command:
+        cmd: >-
+          aws ssm get-parameter
+          --name /devops-final/cloudflare-tunnel-token
+          --with-decryption
+          --query Parameter.Value
+          --output text
+          --region ap-southeast-1
+      register: tunnel_token
+      changed_when: false
+      no_log: true
+
+    - name: Remove an old cloudflared container if present
+      ansible.builtin.command: docker rm -f cloudflared
+      register: cloudflared_remove
+      changed_when: cloudflared_remove.rc == 0
+      failed_when: false
+      no_log: true
+
+    - name: Start Cloudflare Tunnel container
+      ansible.builtin.command:
+        cmd: >-
+          docker run -d
+          --name cloudflared
+          --restart unless-stopped
+          --network host
+          cloudflare/cloudflared:latest
+          tunnel --no-autoupdate run --token {{ tunnel_token.stdout }}
+      no_log: true

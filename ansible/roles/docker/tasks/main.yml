@@ -1,0 +1,21 @@
+---
+- name: Install Docker, Compose and AWS CLI
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose-v2
+      - awscli
+    state: present
+    update_cache: true
+
+- name: Enable and start Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add ubuntu user to docker group
+  ansible.builtin.user:
+    name: ubuntu
+    groups: docker
+    append: true

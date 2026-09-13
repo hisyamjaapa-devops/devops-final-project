@@ -1,0 +1,30 @@
+# Terraform runtime/state
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
+terraform.tfvars
+*.auto.tfvars
+
+# Secrets / credentials
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+id_rsa.*
+.aws/
+credentials
+ansible/group_vars/all.yml
+
+# Application build artifacts
+app/node_modules/
+app/dist/
+app/test-results/
+app/playwright-report/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db

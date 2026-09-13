@@ -1,0 +1,37 @@
+---
+- name: Get AWS account ID from the EC2 instance role
+  ansible.builtin.command: aws sts get-caller-identity --query Account --output text
+  register: aws_account_id
+  changed_when: false
+
+- name: Log Docker in to Amazon ECR
+  ansible.builtin.shell: |
+    set -o pipefail
+    aws ecr get-login-password --region ap-southeast-1 \
+      | docker login --username AWS --password-stdin \
+        {{ aws_account_id.stdout }}.dkr.ecr.ap-southeast-1.amazonaws.com
+  args:
+    executable: /bin/bash
+  changed_when: false
+  no_log: true
+
+- name: Create web application directory
+  ansible.builtin.file:
+    path: /opt/devops-web
+    state: directory
+    mode: "0755"
+
+- name: Deploy web compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: /opt/devops-web/compose.yml
+    mode: "0644"
+
+- name: Pull application and exporter images
+  ansible.builtin.command: docker compose -f /opt/devops-web/compose.yml pull
+  changed_when: false
+
+- name: Start application and Node Exporter
+  ansible.builtin.command: docker compose -f /opt/devops-web/compose.yml up -d
+  register: web_compose
+  changed_when: "'Started' in web_compose.stdout or 'Created' in web_compose.stdout or 'Recreated' in web_compose.stdout"
