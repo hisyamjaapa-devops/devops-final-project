@@ -345,10 +345,10 @@ Fill these in before submission:
 
 | Item | URL / value |
 |---|---|
-| Application | `TODO` |
-| Monitoring / Grafana | `TODO` |
-| GitHub repository | `TODO` |
-| GitHub Pages documentation | `TODO` |
+| Application |  `http://web.syampccare.com` |
+| Monitoring / Grafana |  `https://monitoring.syampccare.com` |
+| GitHub repository |  `https://github.com/hisyamjaapa-devops/devops-final-project` |
+| GitHub Pages documentation | `https://hisyamjaapa-devops.github.io/devops-final-project/` |
 | Grafana username | `admin` |
 | Grafana password | Submit privately through the required submission channel; do not commit it |
 
